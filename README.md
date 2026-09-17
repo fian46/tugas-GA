@@ -74,7 +74,7 @@ flowchart TD
 ```
 
 ### Parameter & Operator Genetika
-- **Panjang Genom**: $\text{NUM\_STAFF} \times \text{DAYS}$ (misal $5 \times 7 = 35$ gen).
+- **Panjang Genom**: `NUM_STAFF` × `DAYS` (misal $6 \times 7 = 42$ gen atau $5 \times 7 = 35$ gen).
 - **Nilai Gen**: Integer $0..6$.
 - **Ukuran Populasi**: 300 individu.
 - **Maksimal Generasi**: 350 generasi (dengan *early stopping* jika semua *hard constraints* lolos).
