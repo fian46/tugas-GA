@@ -5,7 +5,7 @@ from deap import base, creator, tools
 # ==========================================
 # 1. PARAMETER OPERASIONAL K-24
 # ==========================================
-NUM_STAFF = 5        # Fleksibel: dapat diatur 5, 6, 7, atau 8 staf
+NUM_STAFF = 6        # Fleksibel: dapat diatur 5, 6, 7, atau 8 staf
 DAYS = 7             # 7 hari (Senin - Minggu)
 GENOME_LENGTH = NUM_STAFF * DAYS
 
