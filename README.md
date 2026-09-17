@@ -88,7 +88,7 @@ flowchart TD
 ## 4. Struktur Direktori
 
 ```text
-komputasi mesin/
+tugas GA/
 ├── .venv/                   # Virtual environment Python
 ├── requirements.txt         # Daftar dependensi PIP (numpy, deap)
 ├── optimasi_shift_k24.py    # Skrip utama Algoritma Genetika
