@@ -8,56 +8,7 @@ Implementasi ini dibangun menggunakan pustaka [DEAP (Distributed Evolutionary Al
 
 ---
 
-## 1. Latar Belakang & Masalah yang Dioptimasi
-
-### A. Tantangan Penjadwalan Manual
-Penjadwalan shift kerja pada unit 24 jam adalah masalah optimasi kombinatorial yang tergolong **NP-Hard**. 
-Dengan:
-- **5 s.d. 8 staf**
-- **7 hari kerja** (Senin s.d. Minggu)
-- **7 opsi status shift** per hari:
-  - `0`: Libur (*Off*)
-  - `1`: Shift Pagi (07.00 - 15.00)
-  - `2`: Shift Middle / MD (11.00 - 19.00)
-  - `3`: Shift Siang (14.00 - 22.00)
-  - `4`: Shift Malam (22.00 - 07.00)
-  - `5`: **Lembur Pagi-MD (PgMD)** (07.00 - 19.00) — Staf pagi lembur menyambung hingga jam MD
-  - `6`: **Lembur Pagi-Siang (PgSi)** (07.00 - 22.00) — Staf pagi *double shift* menyambung hingga jam Siang
-
-Ruang pencarian kombinasi jadwal sangat masif (untuk 5 staf: $7^{35} \approx 3,79 \times 10^{29}$ kemungkinan; untuk 8 staf: $7^{56} \approx 3,74 \times 10^{47}$ kemungkinan).
-
-### B. Mengapa Diperlukan Aturan Lembur pada Tim Ramping (5–6 Staf)?
-- **Kebutuhan Shift Mingguan**: Setiap hari membutuhkan minimal Pagi 1, MD 1, Siang 1, dan Malam 2 (= 5 shift/hari). Total kebutuhan adalah **35 shift seminggu**.
-- **Batasan Kerja Maksimal 6 Hari**: Jika ada 5 staf dan **tidak boleh ada yang bekerja > 6 hari**, maka kapasitas kerja maksimal yang tersedia adalah $5 \times 6 = \mathbf{30\text{ hari kerja}}$.
-- **Defisit Kapasitas**: Terdapat defisit $35 - 30 = \mathbf{5\text{ shift}}$.
-- **Solusi Lembur**: Shift lembur (`PgMD` dan `PgSi`) mengisi 2 kuota sekaligus dalam 1 hari kerja. Dengan minimal 5 shift lembur yang terdistribusi adil, 5 staf dapat menutupi kebutuhan 35 shift secara sempurna tanpa melanggar hak libur karyawan.
-
----
-
-## 2. Batasan & Kendala Operasional (*Constraints*)
-
-Sistem mengelompokkan aturan operasional ke dalam sistem penalti berbobot (*weighted penalties*):
-
-### A. Hard Constraints (Batasan Mutlak Operasional)
-Pelanggaran batasan ini dikenakan penalti sangat besar ($>1500$) sehingga algoritma dipaksa memenuhinya 100%:
-1. **Shift Malam WAJIB SELALU 2 Orang**: Demi keamanan dan operasional 24 jam, setiap hari (Senin s.d. Minggu) shift malam tidak boleh kurang dari 2 staf (Penalti: $+4000 \times \text{kekurangan staf}$).
-2. **Dilarang Bekerja > 6 Hari Seminggu**: Setiap staf maksimal bekerja 6 hari dalam sepekan (wajib memiliki minimal 1 hari libur/Off) (Penalti: $+4000$ jika bekerja 7 hari nonstop).
-3. **Kuota Shift Lain**: Minimal 1 staf per hari untuk Pagi (diisi `1`, `5`, `6`), MD (diisi `2`, `5`), dan Siang (diisi `3`, `6`) (Penalti: $+1500 \times \text{kekurangan staf}$).
-4. **Larangan Tabrakan Fisik Pasca-Shift Malam (Shift 4)**:
-   - **Malam $\to$ Pagi / Lembur (`1`, `5`, `6`)**: Pulang jam 07.00 langsung masuk jam 07.00 adalah tabrakan fisik langsung (Penalti: $+2500$).
-   - **Malam $\to$ MD (`2`)**: Pulang jam 07.00 masuk jam 11.00 hanya menyisakan jeda 4 jam (Penalti: $+2000$).
-   - *Pilihan sah setelah Shift Malam hanyalah: Libur (`0`), Siang (`3`, jeda 7 jam), atau lanjut Shift Malam (`4`)*.
-
-### B. Soft Constraints (Ergonomi, Lembur, & Beban Kerja)
-1. **Preferensi Penalti Lembur**: Diberikan penalti ringan ($+15$ per shift lembur) agar algoritma mengutamakan jadwal reguler dan hanya mengambil opsi lembur jika kondisi staf mendesak.
-2. **Larangan Lembur Beruntun**: Jika staf mengambil lembur 2 hari berturut-turut, diberikan penalti $+80$ untuk mencegah kelelahan berlebih.
-3. **Transisi Siang $\to$ Pagi / Lembur (SOP K-24)**: Pulang jam 22.00 dan masuk jam 07.00 keesokan harinya adalah transisi yang **wajar dan sah dalam SOP K-24** ($0$ penalti).
-4. **Batas Shift Malam Beruntun**: Maksimal 2 malam berturut-turut untuk menjaga ritme sirkadian staf (Penalti: $+250$ per malam tambahan).
-5. **Keseimbangan Hari Libur**: Maksimal 3 hari libur seminggu untuk mencegah timpang beban kerja ke staf lain (Penalti: $+50$ per kelebihan hari libur).
-
----
-
-## 3. Solusi dengan Algoritma Genetika
+## 1. Solusi dengan Algoritma Genetika
 
 Algoritma Genetika mengoptimasi jadwal melalui siklus evolusi:
 
@@ -85,7 +36,7 @@ flowchart TD
 
 ---
 
-## 4. Struktur Direktori
+## 2. Struktur Direktori
 
 ```text
 tugas GA/
@@ -97,7 +48,7 @@ tugas GA/
 
 ---
 
-## 5. Panduan Instalasi & Eksekusi
+## 3. Panduan Instalasi & Eksekusi
 
 ### A. Aktivasi Virtual Environment
 ```bash
@@ -116,7 +67,7 @@ python optimasi_shift_k24.py
 
 ---
 
-## 6. Contoh Output Eksekusi (Konfigurasi 5 Staf)
+## 4. Contoh Output Eksekusi (Konfigurasi 5 Staf)
 
 Ketika dijalankan dengan konfigurasi **5 staf**, algoritma berhasil mengunci kuota malam 2 orang setiap hari dan memastikan tidak ada karyawan bekerja $>6$ hari:
 
@@ -176,7 +127,8 @@ RINCIAN LENGKAP KOMPONEN PENALTI (Total Skor: 235)
 
 ---
 
-### Transparansi Rincian Komponen Penalti
+## 5. Transparansi Rincian Komponen Penalti
+
 Skrip dilengkapi dengan fitur audit rincian skor (*penalty breakdown*) di akhir eksekusi, sehingga setiap komponen penalti dapat diaudit secara gamblang:
 1. **Kekurangan Shift Malam**: $+4000$ per kekurangan staf (*Hard Constraint* mutlak).
 2. **Bekerja 7 Hari Nonstop**: $+4000$ per karyawan (*Hard Constraint* mutlak: dilarang kerja $>6$ hari).
