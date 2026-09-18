@@ -1,38 +1,45 @@
 # Optimasi Penjadwalan Shift Kerja Apotek 24 Jam (K-24) Menggunakan Algoritma Genetika
 
-Proyek ini mengimplementasikan **Algoritma Genetika (Genetic Algorithm)** untuk menyelesaikan permasalahan penjadwalan shift karyawan (*Staff Rostering Problem*) pada apotek atau unit ritel yang beroperasi 24 jam sehari selama 7 hari seminggu (Senin – Minggu).
+Program ini menggunakan **Algoritma Genetika** untuk membuat jadwal shift kerja karyawan apotek 24 jam (Senin – Minggu) secara otomatis.
 
-Model ini mendukung penjadwalan fleksibel dari **5 hingga 8 staf** serta dilengkapi dengan **aturan shift lembur (*overtime*)**, di mana staf shift pagi dapat menyambung lembur ke jam MD (*Middle*) atau shift Siang untuk memastikan seluruh kuota operasional terpenuhi tanpa melanggar batasan kerja.
+Mendukung **5 sampai 8 staf** dan dilengkapi fitur **shift lembur** (staf pagi lanjut ke shift Middle atau Siang) agar kuota harian selalu terpenuhi tanpa melanggar batasan hari kerja.
 
-Implementasi ini dibangun menggunakan pustaka [DEAP (Distributed Evolutionary Algorithms in Python)](https://github.com/DEAP/deap) dan [NumPy](https://numpy.org/).
+Dibuat menggunakan Python dengan library [DEAP](https://github.com/DEAP/deap) dan [NumPy](https://numpy.org/).
 
 ---
 
-## 1. Solusi dengan Algoritma Genetika
+## 1. Cara Kerja Algoritma Genetika
 
-Algoritma Genetika mengoptimasi jadwal melalui siklus evolusi:
+Proses pencarian jadwal terbaik dilakukan melalui siklus evolusi:
 
 ```mermaid
 flowchart TD
-    A[Inisialisasi Populasi: 300 Individu] --> B[Evaluasi Fitness: Hitung Total Penalti]
+    A[Buat Populasi Awal: 300 Jadwal Acak] --> B[Hitung Total Penalti Tiap Jadwal]
     B --> C{Penalti <= 150 atau Gen == 350?}
-    C -- Ya --> D[Jadwal Optimal Selesai Ditemukan]
-    C -- Tidak --> E[Tournament Selection: Ukuran 4]
-    E --> F[Two-Point Crossover: Probabilitas 0.85]
-    F --> G[Uniform Integer Mutation: Probabilitas 0.35]
-    G --> H[Elitisme: Pertahankan 1 Individu Terbaik ke Generasi Baru]
+    C -- Ya --> D[Jadwal Terbaik Ditemukan]
+    C -- Tidak --> E[Seleksi Turnamen: Pilih Jadwal Terbaik]
+    E --> F[Crossover / Kawin Silang: Tukar Pola Jadwal]
+    F --> G[Mutasi: Acak Sebagian Shift]
+    G --> H[Simpan 1 Jadwal Terbaik ke Generasi Baru]
     H --> B
 ```
 
-### Parameter & Operator Genetika
-- **Panjang Genom**: `NUM_STAFF` × `DAYS` (misal $6 \times 7 = 42$ gen atau $5 \times 7 = 35$ gen).
-- **Nilai Gen**: Integer $0..6$.
-- **Ukuran Populasi**: 300 individu.
-- **Maksimal Generasi**: 350 generasi (dengan *early stopping* jika semua *hard constraints* lolos).
+### Parameter yang Digunakan
+- **Panjang Genom**: `Jumlah Staf` × 7 Hari (misal 5 staf = 35 gen, 6 staf = 42 gen).
+- **Nilai Gen**: Kode shift 0 sampai 6:
+  - `0`: Libur (*Off*)
+  - `1`: Pagi (07.00 - 15.00)
+  - `2`: Middle / MD (11.00 - 19.00)
+  - `3`: Siang (14.00 - 22.00)
+  - `4`: Malam (22.00 - 07.00)
+  - `5`: Lembur Pagi-MD (07.00 - 19.00)
+  - `6`: Lembur Pagi-Siang (07.00 - 22.00)
+- **Ukuran Populasi**: 300 jadwal per generasi.
+- **Maksimal Generasi**: 350 generasi (otomatis berhenti jika jadwal optimal sudah ditemukan).
 - **Seleksi**: *Tournament Selection* (ukuran turnamen = 4).
-- **Crossover**: *Two-Point Crossover* ($P_c = 0.85$).
-- **Mutasi**: *Uniform Integer Mutation* ($P_m = 0.35$, $indpb = 0.05$).
-- **Elitisme**: *Hall of Fame* (ukuran 1) menjamin solusi terbaik tidak pernah terdegradasi.
+- **Crossover**: *Two-Point Crossover* (peluang 85%).
+- **Mutasi**: *Uniform Integer Mutation* (peluang 35%).
+- **Elitisme**: Menyimpan 1 jadwal terbaik agar kualitas solusi tidak menurun.
 
 ---
 
@@ -41,35 +48,35 @@ flowchart TD
 ```text
 tugas GA/
 ├── .venv/                   # Virtual environment Python
-├── requirements.txt         # Daftar dependensi PIP (numpy, deap)
-├── optimasi_shift_k24.py    # Skrip utama Algoritma Genetika
-└── README.md                # Dokumentasi sistem & pemodelan
+├── requirements.txt         # Daftar paket library (numpy, deap)
+├── optimasi_shift_k24.py    # Program utama Algoritma Genetika
+└── README.md                # Dokumentasi proyek
 ```
 
 ---
 
-## 3. Panduan Instalasi & Eksekusi
+## 3. Panduan Menjalankan Program
 
-### A. Aktivasi Virtual Environment
+### A. Aktifkan Virtual Environment
 ```bash
 source .venv/bin/activate
 ```
 
-### B. Instalasi Dependensi
+### B. Install Library yang Dibutuhkan
 ```bash
 pip install -r requirements.txt
 ```
 
-### C. Menjalankan Skrip
+### C. Jalankan Program
 ```bash
 python optimasi_shift_k24.py
 ```
 
 ---
 
-## 4. Contoh Output Eksekusi (Konfigurasi 5 Staf)
+## 4. Contoh Hasil Jadwal (5 Staf)
 
-Ketika dijalankan dengan konfigurasi **5 staf**, algoritma berhasil mengunci kuota malam 2 orang setiap hari dan memastikan tidak ada karyawan bekerja $>6$ hari:
+Ketika dijalankan dengan **5 staf**, program berhasil mengisi kuota malam 2 orang setiap hari dan memastikan seluruh karyawan mendapat hak libur (tidak bekerja lebih dari 6 hari):
 
 ```text
 ======================================================================
@@ -127,15 +134,18 @@ RINCIAN LENGKAP KOMPONEN PENALTI (Total Skor: 235)
 
 ---
 
-## 5. Transparansi Rincian Komponen Penalti
+## 5. Aturan & Bobot Penalti
 
-Skrip dilengkapi dengan fitur audit rincian skor (*penalty breakdown*) di akhir eksekusi, sehingga setiap komponen penalti dapat diaudit secara gamblang:
-1. **Kekurangan Shift Malam**: $+4000$ per kekurangan staf (*Hard Constraint* mutlak).
-2. **Bekerja 7 Hari Nonstop**: $+4000$ per karyawan (*Hard Constraint* mutlak: dilarang kerja $>6$ hari).
-3. **Kekurangan Shift Lain (Pagi, MD, Siang)**: $+1500$ per kekurangan staf.
-4. **Tabrakan Fisik Pasca-Malam**: $+2500$ (Malam $\to$ Pagi/Lembur) dan $+2000$ (Malam $\to$ MD).
-5. **Biaya Lembur**: $+15$ per shift lembur (`PgMD` / `PgSi`).
-6. **Lembur Beruntun**: $+80$ jika staf lembur 2 hari berturut-turut.
-7. **Shift Malam Beruntun**: $+250$ untuk malam ke-3 dan seterusnya tanpa jeda.
-8. **Kelebihan Hari Libur**: $+50$ per kelebihan hari libur (>3 hari).
-9. **Transisi Siang $\to$ Pagi**: $0$ penalti (sah dan wajar menurut SOP K-24).
+Sistem menghitung penalti untuk menentukan jadwal terbaik (semakin kecil penalti, semakin baik jadwalnya):
+
+1. **Shift Malam Kurang dari 2 Orang**: +4000 per kekurangan orang *(Aturan mutlak demi keamanan unit 24 jam)*.
+2. **Bekerja Lebih dari 6 Hari Seminggu**: +4000 per staf *(Aturan mutlak: staf wajib libur minimal 1 hari)*.
+3. **Shift Lain Kosong (Pagi, MD, Siang)**: +1500 per kekurangan orang.
+4. **Jeda Istirahat Terlalu Singkat Setelah Shift Malam**:
+   - Malam langsung lanjut Pagi/Lembur: +2500 *(bentrok jam kerja)*.
+   - Malam lanjut MD: +2000 *(waktu istirahat hanya 4 jam)*.
+5. **Biaya Lembur**: +15 per shift lembur *(agar lembur hanya dipakai jika jumlah staf minim)*.
+6. **Lembur 2 Hari Berturut-turut**: +80 *(mencegah staf kelelahan)*.
+7. **Shift Malam Lebih dari 2 Hari Berturut-turut**: +250 per malam berikutnya.
+8. **Kelebihan Hari Libur**: +50 jika staf libur lebih dari 3 hari seminggu.
+9. **Transisi Shift Siang ke Pagi**: 0 penalti *(sah dan normal sesuai SOP K-24)*.
