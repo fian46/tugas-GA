@@ -57,17 +57,32 @@ tugas GA/
 
 ## 3. Panduan Menjalankan Program
 
-### A. Aktifkan Virtual Environment
-```bash
-source .venv/bin/activate
-```
+> [!NOTE]
+> Folder virtual environment diabaikan (*ignored*) oleh Git, sehingga perlu dibuat terlebih dahulu sebelum diaktifkan.
 
-### B. Install Library yang Dibutuhkan
+### A. Buat Virtual Environment
+Buka terminal pada direktori proyek, lalu buat virtual environment baru:
+```bash
+python3 -m venv .venv
+```
+*(atau `python -m venv .venv` di Windows)*
+
+### B. Aktifkan Virtual Environment
+- **Linux / macOS:**
+  ```bash
+  source .venv/bin/activate
+  ```
+- **Windows (Command Prompt / PowerShell):**
+  ```cmd
+  .venv\Scripts\activate
+  ```
+
+### C. Install Library yang Dibutuhkan
 ```bash
 pip install -r requirements.txt
 ```
 
-### C. Jalankan Program
+### D. Jalankan Program
 ```bash
 python optimasi_shift_k24.py
 ```
